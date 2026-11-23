@@ -1,0 +1,138 @@
+<!doctype html>
+<!-- BattleScene GitHub banner, 1280x640 (also the repo's social preview image).
+     Re-render: run `npm ci` (for the fonts), then screenshot this file at 1280x640, e.g.
+     chrome --headless=new --hide-scrollbars --window-size=1280,640 --screenshot=docs/assets/banner.png docs/assets/banner.html
+     Colors and fonts follow the app's "Hangar HUD" tokens in src/styles.css; the gear shapes come from src/Gear.jsx. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BattleScene banner</title>
+<style>
+  @font-face { font-family: Oxanium; font-weight: 700; src: url(../../node_modules/@fontsource/oxanium/files/oxanium-latin-700-normal.woff2) format('woff2'); }
+  @font-face { font-family: Oxanium; font-weight: 600; src: url(../../node_modules/@fontsource/oxanium/files/oxanium-latin-600-normal.woff2) format('woff2'); }
+  @font-face { font-family: Rajdhani; font-weight: 600; src: url(../../node_modules/@fontsource/rajdhani/files/rajdhani-latin-600-normal.woff2) format('woff2'); }
+  @font-face { font-family: Rajdhani; font-weight: 500; src: url(../../node_modules/@fontsource/rajdhani/files/rajdhani-latin-500-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Share Tech Mono'; font-weight: 400; src: url(../../node_modules/@fontsource/share-tech-mono/files/share-tech-mono-latin-400-normal.woff2) format('woff2'); }
+
+  :root {
+    --bg: #0e1318; --surface: #18202a; --surface-lo: #121920; --line: #33414f; --line-hi: #4a6178;
+    --muted: #95a3b2; --text: #dce4ec; --steel: #5d7892; --accent: #8fd0ff; --cobalt: #3d7bff; --warn: #f2b33d; --green: #8fe3b8;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    position: relative; color: var(--text); font: 500 20px/1.3 Rajdhani, sans-serif;
+    background: repeating-linear-gradient(0deg, rgb(143 208 255 / 2.6%) 0 1px, transparent 1px 4px),
+      radial-gradient(60% 70% at 78% 30%, #1a2a3b, transparent 70%),
+      radial-gradient(50% 60% at 0% 100%, #141f2b, transparent 70%), var(--bg);
+  }
+  /* Frame with HUD corner marks */
+  .frame { position: absolute; inset: 22px; border: 1px solid rgb(74 97 120 / 45%); pointer-events: none; }
+  .frame i { position: absolute; width: 26px; height: 26px; border: 0 solid var(--accent); }
+  .frame i:nth-child(1) { top: -2px; left: -2px; border-width: 3px 0 0 3px; }
+  .frame i:nth-child(2) { top: -2px; right: -2px; border-width: 3px 3px 0 0; }
+  .frame i:nth-child(3) { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; }
+  .frame i:nth-child(4) { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }
+
+  .backdrop { position: absolute; left: -230px; bottom: -330px; width: 720px; height: 720px; fill: var(--steel); opacity: .07; }
+  .wires { position: absolute; inset: 0; }
+  .wires path { fill: none; stroke: var(--line-hi); stroke-width: 1.5; opacity: .5; }
+  .wires path.hot { stroke: var(--accent); opacity: .8; filter: drop-shadow(0 0 4px var(--accent)); }
+  .wires circle { fill: var(--accent); }
+
+  /* Left: brand and pitch */
+  .pitch { position: absolute; left: 76px; top: 92px; width: 600px; }
+  .brand { display: flex; align-items: center; gap: 20px; font: 700 66px/1 Oxanium, sans-serif; letter-spacing: .09em; text-transform: uppercase; }
+  .brand span span { color: var(--accent); }
+  .brand svg { width: 84px; height: 84px; flex: none; }
+  .brand .gear { fill: var(--steel); }
+  .brand .bolt { fill: var(--accent); filter: drop-shadow(0 0 6px rgb(143 208 255 / 60%)); }
+  .kicker { margin: 34px 0 0; font: 400 17px/1 'Share Tech Mono', monospace; letter-spacing: .22em; color: var(--accent); text-transform: uppercase; }
+  .kicker::before { content: ''; display: inline-block; width: 34px; height: 2px; margin: 0 12px 5px 0; background: var(--accent); vertical-align: middle; }
+  h1 { margin-top: 16px; font: 600 50px/1.06 Oxanium, sans-serif; letter-spacing: .01em; }
+  h1 em { font-style: normal; color: var(--warn); }
+  .sub { margin-top: 20px; max-width: 540px; font: 500 24px/1.32 Rajdhani, sans-serif; color: var(--muted); }
+  .tags { position: absolute; left: 76px; bottom: 70px; display: flex; gap: 10px; }
+  .tags span { padding: 8px 13px 7px; border: 1px solid var(--line-hi); border-left: 3px solid var(--cobalt); background: rgb(24 32 42 / 85%);
+    font: 400 15px/1 'Share Tech Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--text); }
+
+  /* Right: the face-off */
+  .bout { position: absolute; left: 726px; top: 112px; width: 480px; }
+  .bout-head { display: flex; justify-content: space-between; align-items: center; font: 400 15px/1 'Share Tech Mono', monospace; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; }
+  .live { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 5px; border: 1px solid var(--accent); color: var(--accent); }
+  .live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .robots { position: relative; display: flex; justify-content: space-between; margin-top: 18px; }
+  .card { position: relative; width: 214px; padding: 6px; border: 1px solid var(--line-hi); background: var(--surface-lo); }
+  .card::before, .card::after { content: ''; position: absolute; width: 16px; height: 16px; border: 0 solid var(--accent); }
+  .card::before { top: -2px; left: -2px; border-width: 2px 0 0 2px; }
+  .card::after { bottom: -2px; right: -2px; border-width: 0 2px 2px 0; }
+  .card img { display: block; width: 100%; aspect-ratio: 1; }
+  .card.left img { transform: scaleX(-1); }
+  .plate { padding: 10px 6px 6px; }
+  .plate b { display: block; font: 700 22px/1 Oxanium, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+  .plate small { display: block; margin-top: 6px; font: 400 13px/1 'Share Tech Mono', monospace; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+  .card.right .plate { text-align: right; }
+  .dial { position: absolute; left: 50%; top: 66px; width: 150px; height: 150px; translate: -50% 0; display: grid; place-items: center; }
+  .dial svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .dial .gear { fill: #233040; stroke: var(--steel); stroke-width: .8; }
+  .dial .ticks line { stroke: #4a5d70; stroke-width: 1.2; }
+  .dial .track { fill: none; stroke: #1c2632; stroke-width: 7; }
+  .dial .arc { fill: none; stroke: var(--accent); stroke-width: 7; filter: drop-shadow(0 0 4px var(--accent)); }
+  .dial .face { position: relative; text-align: center; }
+  .dial .face b { display: block; font: 700 34px/1 Oxanium, sans-serif; letter-spacing: .04em; }
+  .dial .face small { display: block; margin-top: 4px; font: 400 12px/1 'Share Tech Mono', monospace; letter-spacing: .2em; color: var(--accent); }
+  .next { display: flex; justify-content: space-between; margin-top: 22px; padding: 12px 14px; border: 1px solid var(--line); border-left: 3px solid var(--warn);
+    background: rgb(24 32 42 / 85%); font: 400 14px/1 'Share Tech Mono', monospace; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+  .next b { color: var(--text); font-weight: 400; }
+</style>
+</head>
+<body>
+  <svg class="backdrop" viewBox="0 0 600 600" aria-hidden="true"><path fill-rule="evenodd" d="M562.00 300.00L599.87 308.87L598.92 325.47L560.28 329.95L557.54 348.14L593.13 363.82L589.15 379.96L550.35 377.27L544.31 394.65L576.42 416.60L569.53 431.73L531.89 421.96L522.76 437.93L550.28 465.40L540.74 479.02L505.53 462.49L493.62 476.51L515.63 508.57L503.74 520.20L472.17 497.49L457.89 509.08L473.63 544.65L459.81 553.89L432.95 525.76L416.78 534.53L425.72 572.38L410.44 578.93L389.20 546.35L371.70 552.00L373.53 590.85L357.30 594.48L342.42 558.54L324.17 560.88L318.84 599.41L302.22 599.99L294.19 561.94L275.83 560.88L263.50 597.77L247.06 595.29L246.16 556.41L228.30 552.00L209.41 585.99L193.70 580.54L199.96 542.15L183.22 534.53L158.40 564.48L143.96 556.23L157.17 519.64L142.11 509.08L112.21 533.96L99.54 523.19L119.24 489.66L106.38 476.51L72.42 495.47L61.94 482.56L87.47 453.22L77.24 437.93L40.38 450.32L32.45 435.70L62.94 411.55L55.69 394.65L17.18 400.05L12.07 384.23L46.47 366.09L42.46 348.14L3.61 346.38L1.49 329.89L38.65 318.38L38.00 300.00L0.13 291.13L1.08 274.53L39.72 270.05L42.46 251.86L6.87 236.18L10.85 220.04L49.65 222.73L55.69 205.35L23.58 183.40L30.47 168.27L68.11 178.04L77.24 162.07L49.72 134.60L59.26 120.98L94.47 137.51L106.38 123.49L84.37 91.43L96.26 79.80L127.83 102.51L142.11 90.92L126.37 55.35L140.19 46.11L167.05 74.24L183.22 65.47L174.28 27.62L189.56 21.07L210.80 53.65L228.30 48.00L226.47 9.15L242.70 5.52L257.58 41.46L275.83 39.12L281.16 0.59L297.78 0.01L305.81 38.06L324.17 39.12L336.50 2.23L352.94 4.71L353.84 43.59L371.70 48.00L390.59 14.01L406.30 19.46L400.04 57.85L416.78 65.47L441.60 35.52L456.04 43.77L442.83 80.36L457.89 90.92L487.79 66.04L500.46 76.81L480.76 110.34L493.62 123.49L527.58 104.53L538.06 117.44L512.53 146.78L522.76 162.07L559.62 149.68L567.55 164.30L537.06 188.45L544.31 205.35L582.82 199.95L587.93 215.77L553.53 233.91L557.54 251.86L596.39 253.62L598.51 270.11L561.35 281.62ZM470 300A170 170 0 1 0 130 300A170 170 0 1 0 470 300Z"/></svg>
+
+  <!-- Bracket wires behind the face-off -->
+  <svg class="wires" viewBox="0 0 1280 640" aria-hidden="true">
+    <path d="M664 214 H694 V262 H726"/>
+    <path d="M664 310 H694 V262"/>
+    <path class="hot" d="M1206 262 H1258"/>
+    <circle cx="1258" cy="262" r="4"/>
+  </svg>
+
+  <div class="frame"><i></i><i></i><i></i><i></i></div>
+
+  <section class="pitch">
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path class="gear" fill-rule="evenodd" d="M35.50 20.00L39.43 21.63L38.94 24.65L34.69 24.94L33.42 27.75L36.01 31.13L34.07 33.50L30.25 31.63L27.75 33.42L28.30 37.64L25.44 38.73L23.06 35.19L20.00 35.50L18.37 39.43L15.35 38.94L15.06 34.69L12.25 33.42L8.87 36.01L6.50 34.07L8.37 30.25L6.58 27.75L2.36 28.30L1.27 25.44L4.81 23.06L4.50 20.00L0.57 18.37L1.06 15.35L5.31 15.06L6.58 12.25L3.99 8.87L5.93 6.50L9.75 8.37L12.25 6.58L11.70 2.36L14.56 1.27L16.94 4.81L20.00 4.50L21.63 0.57L24.65 1.06L24.94 5.31L27.75 6.58L31.13 3.99L33.50 5.93L31.63 9.75L33.42 12.25L37.64 11.70L38.73 14.56L35.19 16.94ZM31.5 20A11.5 11.5 0 1 0 8.5 20A11.5 11.5 0 1 0 31.5 20Z"/><path class="bolt" d="M21.5 9 13 22h6l-1.5 9 9-13.5h-6z"/></svg>
+      <span>Battle<span>Scene</span></span>
+    </div>
+    <p class="kicker">Free &amp; open source</p>
+    <h1>Run your robot combat<br>event. <em>Free.</em></h1>
+    <p class="sub">Brackets, arenas, live venue screens and team sign-up, hosted on your own free GitHub + Vercel accounts.</p>
+  </section>
+
+  <div class="tags"><span>Brackets</span><span>Arenas</span><span>Venue displays</span><span>Team sign-up</span></div>
+
+  <section class="bout">
+    <div class="bout-head"><span>Arena 1 · Beetleweight · R2</span><span class="live">Live</span></div>
+    <div class="robots">
+      <div class="card left">
+        <img src="../../public/demo-robots/3.svg" alt="">
+        <div class="plate"><b>Grinder</b><small>Team Sparkplug</small></div>
+      </div>
+      <div class="card right">
+        <img src="../../public/demo-robots/1.svg" alt="">
+        <div class="plate"><b>Doorstop</b><small>Wedge Works</small></div>
+      </div>
+      <div class="dial">
+        <svg viewBox="0 0 160 160" aria-hidden="true">
+          <path class="gear" fill-rule="evenodd" d="M151.00 80.00L158.96 82.65L158.63 87.60L150.40 89.19L149.45 94.76L156.68 99.00L155.34 103.78L146.95 103.63L144.86 108.88L151.05 114.53L148.74 118.93L140.58 117.03L137.44 121.73L142.32 128.55L139.15 132.37L131.55 128.82L127.51 132.76L130.86 140.45L126.97 143.52L120.28 138.47L115.50 141.49L117.19 149.70L112.74 151.90L107.24 145.57L101.94 147.53L101.88 155.91L97.07 157.13L93.01 149.80L87.42 150.61L85.62 158.80L80.66 159.00L78.22 150.98L72.58 150.61L69.11 158.25L64.22 157.41L63.50 149.06L58.06 147.53L53.08 154.27L48.47 152.44L49.50 144.12L44.50 141.49L38.23 147.05L34.10 144.30L36.84 136.37L32.49 132.76L25.20 136.90L21.74 133.35L26.06 126.17L22.56 121.73L14.57 124.27L11.92 120.07L17.64 113.94L15.14 108.88L6.79 109.70L5.07 105.04L11.94 100.24L10.55 94.76L2.22 93.83L1.50 88.92L9.22 85.64L9.00 80.00L1.04 77.35L1.37 72.40L9.60 70.81L10.55 65.24L3.32 61.00L4.66 56.22L13.05 56.37L15.14 51.12L8.95 45.47L11.26 41.07L19.42 42.97L22.56 38.27L17.68 31.45L20.85 27.63L28.45 31.18L32.49 27.24L29.14 19.55L33.03 16.48L39.72 21.53L44.50 18.51L42.81 10.30L47.26 8.10L52.76 14.43L58.06 12.47L58.12 4.09L62.93 2.87L66.99 10.20L72.58 9.39L74.38 1.20L79.34 1.00L81.78 9.02L87.42 9.39L90.89 1.75L95.78 2.59L96.50 10.94L101.94 12.47L106.92 5.73L111.53 7.56L110.50 15.88L115.50 18.51L121.77 12.95L125.90 15.70L123.16 23.63L127.51 27.24L134.80 23.10L138.26 26.65L133.94 33.83L137.44 38.27L145.43 35.73L148.08 39.93L142.36 46.06L144.86 51.12L153.21 50.30L154.93 54.96L148.06 59.76L149.45 65.24L157.78 66.17L158.50 71.08L150.78 74.36ZM145 80A65 65 0 1 0 15 80A65 65 0 1 0 145 80Z"/>
+          <g class="ticks"><line x1="137.50" y1="80.00" x2="142.00" y2="80.00"/><line x1="139.17" y1="86.22" x2="141.66" y2="86.48"/><line x1="138.20" y1="92.37" x2="140.65" y2="92.89"/><line x1="136.59" y1="98.39" x2="138.97" y2="99.16"/><line x1="134.36" y1="104.20" x2="136.64" y2="105.22"/><line x1="129.80" y1="108.75" x2="133.69" y2="111.00"/><line x1="128.14" y1="114.97" x2="130.16" y2="116.44"/><line x1="124.22" y1="119.81" x2="126.07" y2="121.49"/><line x1="119.81" y1="124.22" x2="121.49" y2="126.07"/><line x1="114.97" y1="128.14" x2="116.44" y2="130.16"/><line x1="108.75" y1="129.80" x2="111.00" y2="133.69"/><line x1="104.20" y1="134.36" x2="105.22" y2="136.64"/><line x1="98.39" y1="136.59" x2="99.16" y2="138.97"/><line x1="92.37" y1="138.20" x2="92.89" y2="140.65"/><line x1="86.22" y1="139.17" x2="86.48" y2="141.66"/><line x1="80.00" y1="137.50" x2="80.00" y2="142.00"/><line x1="73.78" y1="139.17" x2="73.52" y2="141.66"/><line x1="67.63" y1="138.20" x2="67.11" y2="140.65"/><line x1="61.61" y1="136.59" x2="60.84" y2="138.97"/><line x1="55.80" y1="134.36" x2="54.78" y2="136.64"/><line x1="51.25" y1="129.80" x2="49.00" y2="133.69"/><line x1="45.03" y1="128.14" x2="43.56" y2="130.16"/><line x1="40.19" y1="124.22" x2="38.51" y2="126.07"/><line x1="35.78" y1="119.81" x2="33.93" y2="121.49"/><line x1="31.86" y1="114.97" x2="29.84" y2="116.44"/><line x1="30.20" y1="108.75" x2="26.31" y2="111.00"/><line x1="25.64" y1="104.20" x2="23.36" y2="105.22"/><line x1="23.41" y1="98.39" x2="21.03" y2="99.16"/><line x1="21.80" y1="92.37" x2="19.35" y2="92.89"/><line x1="20.83" y1="86.22" x2="18.34" y2="86.48"/><line x1="22.50" y1="80.00" x2="18.00" y2="80.00"/><line x1="20.83" y1="73.78" x2="18.34" y2="73.52"/><line x1="21.80" y1="67.63" x2="19.35" y2="67.11"/><line x1="23.41" y1="61.61" x2="21.03" y2="60.84"/><line x1="25.64" y1="55.80" x2="23.36" y2="54.78"/><line x1="30.20" y1="51.25" x2="26.31" y2="49.00"/><line x1="31.86" y1="45.03" x2="29.84" y2="43.56"/><line x1="35.78" y1="40.19" x2="33.93" y2="38.51"/><line x1="40.19" y1="35.78" x2="38.51" y2="33.93"/><line x1="45.03" y1="31.86" x2="43.56" y2="29.84"/><line x1="51.25" y1="30.20" x2="49.00" y2="26.31"/><line x1="55.80" y1="25.64" x2="54.78" y2="23.36"/><line x1="61.61" y1="23.41" x2="60.84" y2="21.03"/><line x1="67.63" y1="21.80" x2="67.11" y2="19.35"/><line x1="73.78" y1="20.83" x2="73.52" y2="18.34"/><line x1="80.00" y1="22.50" x2="80.00" y2="18.00"/><line x1="86.22" y1="20.83" x2="86.48" y2="18.34"/><line x1="92.37" y1="21.80" x2="92.89" y2="19.35"/><line x1="98.39" y1="23.41" x2="99.16" y2="21.03"/><line x1="104.20" y1="25.64" x2="105.22" y2="23.36"/><line x1="108.75" y1="30.20" x2="111.00" y2="26.31"/><line x1="114.97" y1="31.86" x2="116.44" y2="29.84"/><line x1="119.81" y1="35.78" x2="121.49" y2="33.93"/><line x1="124.22" y1="40.19" x2="126.07" y2="38.51"/><line x1="128.14" y1="45.03" x2="130.16" y2="43.56"/><line x1="129.80" y1="51.25" x2="133.69" y2="49.00"/><line x1="134.36" y1="55.80" x2="136.64" y2="54.78"/><line x1="136.59" y1="61.61" x2="138.97" y2="60.84"/><line x1="138.20" y1="67.63" x2="140.65" y2="67.11"/><line x1="139.17" y1="73.78" x2="141.66" y2="73.52"/></g>
+          <circle class="track" cx="80" cy="80" r="52"/>
+          <circle class="arc" cx="80" cy="80" r="52" transform="rotate(-90 80 80)" stroke-dasharray="244.9 326.7"/>
+        </svg>
+        <div class="face"><b>2:27</b><small>FIGHT</small></div>
+      </div>
+    </div>
+    <div class="next"><span>Up next</span><b>Hexadecimator vs Crumple Zone</b></div>
+  </section>
+</body>
+</html>

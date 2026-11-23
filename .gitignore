@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.vercel/
+.battlescene/
+.env*
+!.env.example
+playwright-report/
+test-results/
+
+# Walkthrough video outputs (scripts/walkthrough)
+docs/video/

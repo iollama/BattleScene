@@ -87,7 +87,7 @@ Each meetup has a display language, English or Hebrew, chosen when the meetup is
 
 Every screen ends with the developer credit, “© <current year> Developed by Udi Tirosh”, linking to https://www.iollama.com/. This includes the staff dashboard, sign-in, spectator pages, and venue displays (in Hebrew on Hebrew pages). After it comes a **Get your own BattleScene** link to the public project, https://github.com/iollama/BattleScene, which opens in a new tab. Venue display links (a display's own link and the In battle link) leave that link out, since nobody can click a TV. On wide venue displays the credit fits within the screen without scrolling. Display previews inside the dashboard leave it out.
 
-The staff sign-in page shows the BattleScene banner (the README's image: what the app does and that it's free) above the **Sign in with Google** card, so a visitor who isn't staff can see what the app is.
+The staff sign-in page has **Sign in with Google** at the right of the header, on the same row as the BattleScene logo. Below it, the page shows the BattleScene banner (the README's image: what the app does and that it's free), so a visitor who isn't staff can see what the app is. A Google account without staff access gets a message above the banner and a **Sign out** button in place of **Sign in with Google**.
 
 ## Battle timer
 

@@ -44,7 +44,7 @@ svg { flex-shrink: 0; }
 small { font-size: .875rem; }
 
 /* HUD corner marks: set --fill (background) and --corner (mark color) instead of background. */
-:is(.panel, .arena-card, .metric, .signin-card, .ringmaster-card, .ladder-lane, .battle, .battle-idle, .arena-focus) {
+:is(.panel, .arena-card, .metric, .ringmaster-card, .ladder-lane, .battle, .battle-idle, .arena-focus) {
   --fill: var(--surface);
   --corner: var(--steel);
   background:
@@ -129,8 +129,6 @@ small { font-size: .875rem; }
 .meetup-row > svg { color: var(--muted); }
 .meetup-row:hover, .meetup-row[aria-current] { background: var(--surface-hi); border-color: var(--line-hi); border-left-color: var(--accent); }
 .meetup-row[aria-current] > strong, .meetup-row:hover > svg { color: var(--accent); }
-.signin h1 { font: 800 clamp(2.6rem, 5vw, 4.4rem)/.95 var(--display-font); letter-spacing: .03em;
-  text-transform: uppercase; overflow-wrap: anywhere; }
 
 .button, .icon-button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 42px; border: 1px solid transparent;
   border-radius: 2px; padding: 8px 15px; font: 700 .92rem/1.05 var(--display-font); letter-spacing: .08em; text-transform: uppercase;
@@ -464,15 +462,13 @@ input::placeholder, textarea::placeholder { color: #75849a; }
 .signin > :not(.gear-backdrop) { position: relative; z-index: 1; }
 .standalone, .signin { padding-bottom: calc(clamp(18px, 5vw, 50px) + 46px); }
 .standalone > .credit, .signin > .credit { position: absolute; inset: auto 0 0; z-index: 1; }
-.signin-card { --corner: var(--accent); display: grid; width: min(100%, 510px); margin: min(10vh, 110px) auto 0; gap: 15px; padding: clamp(23px, 5vw, 45px);
+/* Sign-in: the brand and the sign-in button share the header row; the README banner says what the app does. */
+.signin-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 15px; }
+.signin-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.signin-main { display: grid; gap: 15px; width: min(100%, 880px); margin: min(6vh, 60px) auto 0; }
+.signin-note { color: var(--muted); }
+.signin-banner { display: block; width: 100%; height: auto;
   border: 1px solid var(--line-hi); box-shadow: 0 0 40px rgb(143 208 255 / 8%); }
-.signin-card p { color: var(--muted); }
-.signin-card .button { justify-self: start; }
-.signin-emblem { display: block; width: 52px; height: 52px; }
-/* The README banner, above the sign-in card, so visitors see what the app does. */
-.signin-banner { display: block; width: min(100%, 880px); height: auto; margin: min(4vh, 40px) auto -15px;
-  border: 1px solid var(--line-hi); box-shadow: 0 0 40px rgb(143 208 255 / 8%); }
-.signin-banner + .signin-card { margin-top: 0; }
 
 /* Last call: amber countdown for robots to reach the arena. */
 .last-call { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; padding: 14px 18px; margin: 10px 0 14px;

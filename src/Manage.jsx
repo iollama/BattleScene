@@ -9,7 +9,7 @@ import { MAX_WEIGHT_CLASSES } from '../server/demo.js';
 import { describeActivity } from '../shared/activity.js';
 import { LANGUAGES } from '../shared/i18n.js';
 import Displays from './Displays.jsx';
-import { GearBackdrop, GearMark } from './Gear.jsx';
+import { GearBackdrop } from './Gear.jsx';
 import { Brand } from './Spectator.jsx';
 import { ArenaDetails, Brackets, CheckIn, Overview, Roster, WeightTabs } from './Tournament.jsx';
 import { api, Credit, Dialog, Empty, Field, formatDate, formatName, Issue } from './ui.jsx';
@@ -549,22 +549,25 @@ function GeneralSettings({ user, notify }) {
 
 function Login({ session, error, retry }) {
   const denied = session?.user && !session.user.role;
+  // The banner says what the app is; the header carries the one action (sign in, or sign out to switch accounts).
   return <div className="signin">
     <GearBackdrop />
-    <Brand />
-    <img className="signin-banner" src={banner} width="1280" height="640"
-      alt="BattleScene: run your robot combat event, free. Brackets, arenas, live venue screens and team sign-up." />
-    <main className="signin-card">
-      <span className="signin-emblem"><GearMark /></span>
-      <h1>Meetup control</h1>
-      <p>Run your brackets, arena queues, and venue displays.</p>
+    <header className="signin-bar">
+      <Brand />
+      <div className="signin-actions">
+        {session?.configured && !denied && <a className="button primary" href="/api/auth/login" data-tip="Sign in with your staff Google account">Sign in with Google</a>}
+        {denied && <button className="button secondary" data-tip="Sign out so you can use a different Google account" onClick={() => {
+          fetch('/api/auth/logout', { method: 'POST' }).then(() => location.assign('/'));
+        }}>Sign out</button>}
+        {!session && error && <button className="button secondary" onClick={retry} data-tip="Try connecting again">Retry</button>}
+      </div>
+    </header>
+    <main className="signin-main">
+      <h1 className="sr-only">BattleScene meetup control</h1>
       <Issue>{error || (denied ? 'Your Google account needs staff access. Contact the super admin.' : '')}</Issue>
-      {session?.configured && <a className="button primary" href="/api/auth/login" data-tip="Sign in with your staff Google account">Sign in with Google</a>}
-      {session && !session.configured && <p>Google sign-in is awaiting deployment configuration.</p>}
-      {!session && error && <button className="button secondary" onClick={retry} data-tip="Try connecting again">Retry</button>}
-      {denied && <button className="button secondary" data-tip="Sign out so you can use a different Google account" onClick={() => {
-        fetch('/api/auth/logout', { method: 'POST' }).then(() => location.assign('/'));
-      }}>Sign out</button>}
+      {session && !session.configured && <p className="signin-note">Google sign-in is awaiting deployment configuration.</p>}
+      <img className="signin-banner" src={banner} width="1280" height="640"
+        alt="BattleScene: run your robot combat event, free. Brackets, arenas, live venue screens and team sign-up." />
     </main>
     <Credit />
   </div>;

@@ -85,11 +85,15 @@ export function matchStatusHint(match) {
 }
 
 // Developer credit shown at the bottom of every screen. The year follows the viewer's clock.
-export function Credit() {
+// The "get your own" link always points at the public project, even on someone else's copy.
+// Venue screens (`venue`) leave it out: nobody can click a link on a TV.
+const PUBLIC_REPO ='https://github.com/iollama/BattleScene';
+export function Credit({ venue = false }) {
   const t = useT();
   return <footer className="credit">
     © {new Date().getFullYear()} {t('developedBy')} <a href="https://www.iollama.com/" target="_blank" rel="noopener noreferrer"
       data-tip="Open iollama.com in a new tab">Udi Tirosh</a>
+    {!venue && <> · <a href={PUBLIC_REPO} target="_blank" rel="noopener noreferrer" data-tip={t('getYourOwnTip')}>{t('getYourOwn')}</a></>}
   </footer>;
 }
 

@@ -131,7 +131,7 @@ function SpectatorPage({ meetup, language, view = '', item = '', preview = false
           </>}
         </>}
       </SpectatorStage>
-      {!preview && <Credit />}
+      {!preview && <Credit venue={view === 'screen' || view === 'battle'} />}
     </div>
   </div>;
 }

@@ -105,6 +105,8 @@ export const strings = {
     displayUnavailableHint: 'Choose an arena or display from the meetup page.',
     scanQr: 'Scan QR code',
     developedBy: 'Developed by',
+    getYourOwn: 'Get your own BattleScene',
+    getYourOwnTip: 'Open the free BattleScene project on GitHub in a new tab',
     // Robot photos
     photoOf: 'Photo of {name}',
     photoChoose: 'Take or choose a photo',
@@ -298,6 +300,8 @@ export const strings = {
     displayUnavailableHint: 'בחרו זירה או תצוגה מעמוד המפגש.',
     scanQr: 'סרקו את קוד ה-QR',
     developedBy: 'פותח על ידי',
+    getYourOwn: 'הקימו BattleScene משלכם',
+    getYourOwnTip: 'פתיחת הפרויקט החינמי BattleScene ב-GitHub בכרטיסייה חדשה',
     // Robot photos
     photoOf: 'תמונה של {name}',
     photoChoose: 'צלמו או בחרו תמונה',

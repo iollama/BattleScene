@@ -469,6 +469,10 @@ input::placeholder, textarea::placeholder { color: #75849a; }
 .signin-card p { color: var(--muted); }
 .signin-card .button { justify-self: start; }
 .signin-emblem { display: block; width: 52px; height: 52px; }
+/* The README banner, above the sign-in card, so visitors see what the app does. */
+.signin-banner { display: block; width: min(100%, 880px); height: auto; margin: min(4vh, 40px) auto -15px;
+  border: 1px solid var(--line-hi); box-shadow: 0 0 40px rgb(143 208 255 / 8%); }
+.signin-banner + .signin-card { margin-top: 0; }
 
 /* Last call: amber countdown for robots to reach the arena. */
 .last-call { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; padding: 14px 18px; margin: 10px 0 14px;

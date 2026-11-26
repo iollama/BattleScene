@@ -4,6 +4,7 @@ import {
   Radio, RefreshCw, Settings as SettingsIcon, ShieldCheck, SlidersHorizontal, Sparkles, Trash2,
 } from 'lucide-react';
 import QRCode from 'qrcode';
+import banner from '../docs/assets/banner.png';
 import { MAX_WEIGHT_CLASSES } from '../server/demo.js';
 import { describeActivity } from '../shared/activity.js';
 import { LANGUAGES } from '../shared/i18n.js';
@@ -551,6 +552,8 @@ function Login({ session, error, retry }) {
   return <div className="signin">
     <GearBackdrop />
     <Brand />
+    <img className="signin-banner" src={banner} width="1280" height="640"
+      alt="BattleScene: run your robot combat event, free. Brackets, arenas, live venue screens and team sign-up." />
     <main className="signin-card">
       <span className="signin-emblem"><GearMark /></span>
       <h1>Meetup control</h1>

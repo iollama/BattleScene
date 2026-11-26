@@ -62,7 +62,7 @@ function Profile({ state, act, back }) {
   </form>;
 }
 
-function RobotForm({ state, robot, saved, act, back }) {
+function RobotForm({ state, token, robot, saved, act, back }) {
   const t = useT();
   const editing = Boolean(robot);
   const start = robot ?? saved ?? {};
@@ -92,7 +92,8 @@ function RobotForm({ state, robot, saved, act, back }) {
       setBusy(false);
     }
   }
-  const upload = async payload => (await api('garage', payload)).url;
+  // An upload needs the same access as registering, so it names the meetup and carries the link's token.
+  const upload = async payload => (await api('garage', { meetup: state.meetup.id, token, ...payload })).url;
   return <form className="register-card stack" onSubmit={submit}>
     <div className="register-card-head">
       <button type="button" className="icon-button" onClick={() => back()} aria-label={t('regCancel')} data-tip={t('regBackTip')}>
@@ -176,6 +177,7 @@ function Home({ state, open, notice }) {
   const { meetup, registration } = state;
   const className = id => meetup.divisions.find(item => item.id === id)?.name ?? '';
   const editOnly = state.entries.length > 0;
+  const full = state.entries.length >= (registration.limit ?? Infinity);
   const closedHint = meetup.complete ? 'regComplete' : registration.tokenValid
     ? (editOnly ? 'regClosedHint' : 'regClosedEmpty') : (editOnly ? 'regOldLinkHint' : 'regOldLinkEmpty');
   return <div className="register-card stack">
@@ -190,9 +192,9 @@ function Home({ state, open, notice }) {
         {t(entry.withdrawn ? 'withdrawn' : entry.checkedIn ? 'regStatusCheckedIn' : 'regStatusRegistered')}</span>
       <button className="button secondary compact" onClick={() => open({ robot: entry })} data-tip={t('regEditTip', { name: entry.name })}>{t('regEdit')}</button>
     </div>)}</div>}
-    {registration.open && registration.tokenValid
-      ? <button className="button primary" onClick={() => open({ add: true })} data-tip={t('regAddRobotTip')}><Plus size={17} />{t('regAddRobot')}</button>
-      : <p className="register-muted">{t(closedHint)}</p>}
+    {!(registration.open && registration.tokenValid) ? <p className="register-muted">{t(closedHint)}</p>
+      : full ? <p className="register-muted">{t('regLimitReached', { count: registration.limit })}</p>
+        : <button className="button primary" onClick={() => open({ add: true })} data-tip={t('regAddRobotTip')}><Plus size={17} />{t('regAddRobot')}</button>}
     <div className="register-footer-actions">
       {meetup.published && <a className="button secondary" href={watchLink(meetup.id)} data-tip={t('regLiveViewTip')}><Radio size={16} />{t('regLiveView')}</a>}
       <button className="button quiet compact" onClick={() => open({ profile: true })} data-tip={t('regEditProfileTip')}>{t('regEditProfile')}</button>
@@ -252,7 +254,7 @@ function RegisterPage({ id, token, language, choose, state, setState, error }) {
     && !(state.registration.open && state.registration.tokenValid && !state.meetup.complete)) body = <Closed state={state} />;
   else if (!state.profile?.phone || view.profile) body = <Profile state={state} act={act} back={state.profile?.phone ? () => back() : null} />;
   else if (view.add) body = <AddRobot state={state} act={act} back={back} choose={choice => open({ form: true, ...choice })} />;
-  else if (view.form || view.robot) body = <RobotForm key={view.robot?.id ?? view.saved?.id ?? 'new'} state={state} robot={view.robot}
+  else if (view.form || view.robot) body = <RobotForm key={view.robot?.id ?? view.saved?.id ?? 'new'} state={state} token={token} robot={view.robot}
     saved={view.saved} act={act} back={back} />;
   else body = <Home state={state} open={open} notice={notice} />;
   return <div className="register" lang={language} dir={direction(language)} style={meetup?.accent ? { '--theme-accent': meetup.accent } : undefined}>

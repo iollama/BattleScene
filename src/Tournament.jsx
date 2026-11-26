@@ -3,7 +3,7 @@ import { Check, CircleDot, ClipboardPaste, Download, GitFork, ListOrdered, Lock,
 import { canSwapSlots, isArenaActive, resolveBracket } from '../server/bracket.js';
 import {
   api, BracketBoard, Countdown, Dialog, Empty, External, Field, Issue, Placements, Standings,
-  downloadCsv, findMatch, findRobot, formatName, matchup, matchSlots, matchStatus, matchStatusHint, readCsv, roundName, slotLabel, watchLink,
+  downloadCsv, findMatch, findRobot, formatName, matchup, matchSlots, matchStatus, matchStatusHint, readCsv, roundName, slotLabel, watchLink, wordFit,
 } from './ui.jsx';
 import { calledMatch, LastCall } from './LastCall.jsx';
 import { useT } from './i18n.jsx';
@@ -34,7 +34,7 @@ export function Pair({ division, match, photos = 'sm' }) {
   const robots = match.entrants.map(id => findRobot(division, id));
   const side = robot => <div>
     {photos && <RobotPhoto robot={robot} size={photos} />}
-    <span className="pair-text"><strong><bdi>{robot?.name ?? t('tbd')}</bdi></strong><small><bdi>{robot?.team}</bdi></small>
+    <span className="pair-text"><strong style={wordFit(robot?.name ?? t('tbd'))}><bdi>{robot?.name ?? t('tbd')}</bdi></strong><small><bdi>{robot?.team}</bdi></small>
       <Weapon robot={robot} /></span>
   </div>;
   return <div className="pair">{side(robots[0])}<span>{t('versus')}</span>{side(robots[1])}</div>;
@@ -151,9 +151,10 @@ export function ArenaDetails({ meetup, division, act, busy, publicView = false }
           const index = upcoming.indexOf(match);
           const move = target => ignore(send('moveMatch', match, { before: target.id }, 'Queue updated'));
           const editable = index >= 0;
+          const label = [0, 1].map(slot => slotLabel(division, match, slot)).join(' vs ');
           return <div className="queue-row" key={match.id}>
             <span className="match-code">{match.id}</span>
-            <div className="queue-match"><strong>{[0, 1].map(slot => slotLabel(division, match, slot)).join(' vs ')}</strong><small>{roundName(match)}</small></div>
+            <div className="queue-match"><strong style={wordFit(label)}>{label}</strong><small>{roundName(match)}</small></div>
             <span className={'status ' + (match.call ? 'warn' : match.ready ? 'ready' : match.state === 'running' ? 'active' : '')}
               tabIndex={0} data-tip={matchStatusHint(match)}>{matchStatus(match)}</span>
             <div className="queue-actions">
@@ -298,7 +299,7 @@ export function CheckIn({ meetup, act, busy, openSetup }) {
     {!rows.length ? <Empty title="No matching robots">{waiting ? 'Everyone shown here has checked in.' : 'Try a different name or class.'}</Empty>
       : <div className="checkin-list">{rows.map(({ robot, division, locked, inBracket, fighting }) => <div className="checkin-row" key={robot.id}>
         <div className="robot-row-name"><RobotPhoto robot={robot} size="xs" />
-          <div className="queue-match"><strong>{robot.name}</strong><small>{robot.team}</small>
+          <div className="queue-match"><strong style={wordFit(robot.name)}>{robot.name}</strong><small>{robot.team}</small>
             {robot.contact?.phone && <a className="robot-phone" href={'tel:' + robot.contact.phone.replace(/[^\d+]/g, '')}
               data-tip={'Call ' + robot.contact.name + ' about ' + robot.name}><Phone size={13} />{robot.contact.phone}</a>}</div></div>
         <span className="roster-tag">{division.name}</span>
@@ -374,7 +375,7 @@ export function Roster({ meetup, division, act, busy }) {
             {division.robots.map((entry, seed) => <option value={seed + 1} key={entry.id}>{seed + 1}</option>)}
           </select>
           <div className="robot-row-name"><RobotPhoto robot={robot} size="xs" />
-            <div className="queue-match"><strong>{robot.name}</strong><small>{robot.team}{robot.weapon ? ' · ' + robot.weapon : ''}</small>
+            <div className="queue-match"><strong style={wordFit(robot.name)}>{robot.name}</strong><small>{robot.team}{robot.weapon ? ' · ' + robot.weapon : ''}</small>
               {robot.owner && <span className="roster-tag team-tag" tabIndex={0}
                 data-tip={'Registered to ' + robot.owner + (robot.contact?.phone ? ' · ' + robot.contact.phone : '') + '. The team can edit it from its registration page.'}>Team</span>}
               {division.matches.length > 0 && !robot.withdrawn && !bracketIds.has(robot.id) && <span className="roster-tag">Not in bracket</span>}</div></div>

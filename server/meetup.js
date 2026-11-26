@@ -312,11 +312,21 @@ function ownRobot(division, data, actor) {
   return robot;
 }
 
+// One account can hold a handful of robots in a meetup, counting robots staff assigned to it, so a shared link
+// can't be used to flood a class. Staff can still add more for a team.
+export const MAX_TEAM_ROBOTS = 5;
+export function requireTeamRoom(meetup, owner) {
+  const count = meetup.divisions.flatMap(item => item.robots).filter(robot => robot.owner === owner).length;
+  requireValue(count < MAX_TEAM_ROBOTS,
+    `You can register up to ${MAX_TEAM_ROBOTS} robots in this meetup. Ask the organizer if you need more.`, 409);
+}
+
 function teamRegister(meetup, division, data, actor) {
   requireValue(actor.email, 'Sign in with Google to register.', 401);
   requireValue(meetup.registration?.open, 'Registration for this meetup is closed.', 409);
   requireValue(typeof data.token === 'string' && data.token === meetup.registration.token,
     'This registration link is no longer valid. Ask the organizer for the new link.', 403);
+  requireTeamRoom(meetup, actor.email);
   const extra = { owner: actor.email, contact: contact(actor, data) };
   const savedId = text(data.savedId, 24);
   if (savedId) extra.savedId = savedId;
@@ -519,6 +529,9 @@ function saveDisplay(meetup, data) {
   if (data.spectator === false && meetup.spectatorScreenId === screen.id) meetup.spectatorScreenId = null;
 }
 
+// The activity log keeps only the latest changes, so a long or noisy meetup can't grow its record without limit.
+const MAX_AUDIT = 500;
+
 export function updateMeetup(current, data, actor, registry, now = Date.now()) {
   const meetup = structuredClone(current);
   const division = data.division ? divisionById(meetup, data.division) : null;
@@ -696,6 +709,7 @@ export function updateMeetup(current, data, actor, registry, now = Date.now()) {
   meetup.revision++;
   meetup.updatedAt = now;
   meetup.audit.push(changes);
+  if (meetup.audit.length > MAX_AUDIT) meetup.audit.splice(0, meetup.audit.length - MAX_AUDIT);
   return meetup;
 }
 
@@ -706,6 +720,14 @@ export function currentTheme({ image, ...theme }) {
   const legacy = theme.accent?.toLowerCase() === legacyDefaultColors.accent
     && theme.background?.toLowerCase() === legacyDefaultColors.background;
   return legacy ? { ...theme, accent: defaultTheme.accent, background: defaultTheme.background } : theme;
+}
+
+// The uploaded images anyone may fetch: the theme logo and the robots' photos, once the meetup is published.
+export function publicImages(meetup) {
+  if (!meetup?.published) return new Set();
+  const prefix = '/api/assets/' + meetup.id + '/';
+  const images = [meetup.theme?.logo, ...meetup.divisions.flatMap(division => division.robots.map(robot => robot.photo))];
+  return new Set(images.filter(image => typeof image === 'string' && image.startsWith(prefix)));
 }
 
 export function publicMeetup(meetup) {

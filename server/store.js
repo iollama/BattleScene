@@ -14,8 +14,11 @@ export function createStore({ local, directory, blob = vercelBlob }) {
     // and the SDK authenticates with the project's OIDC identity and BLOB_STORE_ID.
     const auth = token ? { token } : {};
     return {
-      async read(path, binary = false) {
-        const item = await get(path, { ...auth, access: 'private', useCache: false });
+      // `cached` reads through Blob's CDN cache: repeat reads are not counted as operations, but an overwrite can
+      // take up to a minute to show. Use it only for files that are never overwritten (images) or for readers
+      // that can live with that delay; anything that will be written back must be read exactly.
+      async read(path, binary = false, cached = false) {
+        const item = await get(path, { ...auth, access: 'private', useCache: cached });
         if (!item) return null;
         const response = new Response(item.stream);
         return {
@@ -48,14 +51,18 @@ export function createStore({ local, directory, blob = vercelBlob }) {
         } while (cursor);
         return paths;
       },
-      // Deletes one object, or everything under a prefix ending in "/".
+      // Deletes one object, or everything under a prefix ending in "/". One object needs no listing, and a
+      // listing is a counted operation while a delete is free.
       async remove(path) {
+        if (!path.endsWith('/')) {
+          await del([path], auth);
+          return;
+        }
         const targets = [];
         let cursor;
         do {
           const page = await list({ ...auth, prefix: path, cursor, limit: 1000 });
-          targets.push(...page.blobs.map(item => item.pathname)
-            .filter(name => path.endsWith('/') ? name.startsWith(path) : name === path));
+          targets.push(...page.blobs.map(item => item.pathname).filter(name => name.startsWith(path)));
           cursor = page.hasMore ? page.cursor : undefined;
         } while (cursor);
         if (targets.length) await del(targets, auth);
@@ -64,9 +71,16 @@ export function createStore({ local, directory, blob = vercelBlob }) {
   }
 
   const root = resolve(directory || '.battlescene/data');
+  // Reads, writes and deletes take turns. A write must see the file as the previous write left it, and on Windows
+  // renaming a file into place fails while another request still has the old one open for reading.
   let pending = Promise.resolve();
+  function inTurn(work) {
+    const run = pending.then(work);
+    pending = run.catch(() => {});
+    return run;
+  }
   const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-  async function read(path, binary = false) {
+  async function load(path, binary) {
     try {
       const bytes = await readFile(join(root, path));
       return { value: binary ? bytes : JSON.parse(bytes.toString()), etag: hash(bytes) };
@@ -76,27 +90,19 @@ export function createStore({ local, directory, blob = vercelBlob }) {
     }
   }
   return {
-    read,
-    async write(path, value, expected, contentType = 'application/json') {
-      const write = pending.then(async () => {
-        const prior = await read(path, contentType !== 'application/json');
-        requireValue((prior?.etag ?? null) === (expected ?? null),
-          'A newer change was saved. Review the latest state and try again.', 409);
-        const destination = join(root, path);
-        const temporary = destination + '.' + randomUUID() + '.tmp';
-        await mkdir(dirname(destination), { recursive: true });
-        await writeFile(temporary, contentType === 'application/json' ? JSON.stringify(value) : value);
-        await rename(temporary, destination);
-      });
-      pending = write.catch(() => {});
-      return write;
-    },
+    read: (path, binary = false) => inTurn(() => load(path, binary)),
+    write: (path, value, expected, contentType = 'application/json') => inTurn(async () => {
+      const prior = await load(path, contentType !== 'application/json');
+      requireValue((prior?.etag ?? null) === (expected ?? null),
+        'A newer change was saved. Review the latest state and try again.', 409);
+      const destination = join(root, path);
+      const temporary = destination + '.' + randomUUID() + '.tmp';
+      await mkdir(dirname(destination), { recursive: true });
+      await writeFile(temporary, contentType === 'application/json' ? JSON.stringify(value) : value);
+      await rename(temporary, destination);
+    }),
     // Deletes one file, or a whole directory when the path ends in "/".
-    async remove(path) {
-      const removal = pending.then(() => rm(join(root, path), { recursive: true, force: true }));
-      pending = removal.catch(() => {});
-      return removal;
-    },
+    remove: path => inTurn(() => rm(join(root, path), { recursive: true, force: true })),
     async paths(prefix) {
       try {
         const entries = await readdir(join(root, prefix));

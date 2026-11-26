@@ -101,10 +101,15 @@ Your meetups live in your Blob store, not in the code, so updating never touches
 
 ### What it costs
 
-Nothing for a typical club. Vercel's **Hobby** plan, its included Vercel Blob storage, and Google sign-in are all free, and a meetup uses only a small amount of storage and traffic. Two things to know:
+Nothing for a typical club. Vercel's **Hobby** plan, its included Vercel Blob storage, and Google sign-in are all free. Three things to know:
 
 - Vercel's [terms](https://vercel.com/legal/terms) allow the Hobby plan only for **personal or non-commercial** use. If your events are run as a business, you might need the Pro plan; see the [Hobby plan](https://vercel.com/docs/plans/hobby) and [fair use guidelines](https://vercel.com/docs/limits/fair-use-guidelines).
-- The free allowances have limits ([Blob usage and pricing](https://vercel.com/docs/vercel-blob/usage-and-pricing)). Robot photos are compressed on the phone before upload to keep storage small.
+- **The free allowance fits about two event days a month.** Vercel counts every read and write of your data: 10,000 reads and 2,000 writes a month on Hobby ([Blob usage and pricing](https://vercel.com/docs/vercel-blob/usage-and-pricing)). By our estimate, an event day with 30 robots, photos, three staff and 50 spectators uses about a third of the reads and half of the writes. Screens and phones refreshing also count toward Vercel's 1,000,000 requests a month; the same event day is roughly a third of that.
+- **If an allowance runs out, Vercel blocks that feature for 30 days instead of charging you**, and for storage that means the app stops working. Open **Usage** in your Vercel dashboard after your first event to see what a day really costs you, and act on Vercel's usage emails. The Pro plan bills for extra use instead of blocking.
+
+The app is built to spend the allowance only on real use. Visitors who aren't signed in can't run up your storage reads, however many requests they send. Each team account is limited to 100 changes and 30 photo uploads a day. A screen left on a meetup that nobody is changing costs nothing.
+
+**Recommended: add a rate limit.** Hobby includes one rate-limit rule in the [Vercel Firewall](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting). In your project's **Firewall** settings, add a rule that limits each IP address to 300 requests a minute on paths that start with `/api/`, leaving out `/api/watch/` and `/api/assets/`. Those two serve the screens and photos, and everyone on your venue's Wi-Fi shares one IP address.
 
 <details>
 <summary><strong>Troubleshooting and advanced setup</strong></summary>
@@ -113,6 +118,8 @@ Nothing for a typical club. Vercel's **Hobby** plan, its included Vercel Blob st
 - **`redirect_uri_mismatch` from Google:** the redirect URI on the Google client must be exactly `APP_ORIGIN` + `/api/auth/callback`.
 - **The site says sign-in needs deployment credentials:** one of the five environment variables is missing, or `SESSION_SECRET` is shorter than 32 characters. Fix it in Vercel and redeploy.
 - **Storage errors (503):** no Blob store is connected. Connect one under **Storage** and redeploy.
+- **Everything stops working partway through the month:** check **Usage** in Vercel. A used-up Blob allowance blocks storage for 30 days on Hobby; see [What it costs](#what-it-costs).
+- **A change took a minute or two to show:** Vercel sometimes runs two copies of the server. A change saved through one (granting a manager, publishing, a new photo) can take up to about two minutes to reach the other. Results and timers on a meetup that is being run are not affected.
 - **Blob store linking:** either way of linking works. A read-write token sets `BLOB_READ_WRITE_TOKEN`. A store linked through the project's OIDC identity sets `BLOB_STORE_ID`. If both are set, the app uses the token.
 - **Preview deployments:** use a separate Blob store for preview deployments that need live storage, so tests don't touch your real meetups.
 - **Custom domain:** after adding it in Vercel, set `APP_ORIGIN` to the new address, add the matching redirect URI on the Google client, and redeploy.

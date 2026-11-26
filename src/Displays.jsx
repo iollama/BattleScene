@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Clipboard, Images, LayoutTemplate, Monitor, Plus, QrCode, Smartphone } from 'lucide-react';
 import { CLASS_DISPLAY_LAYOUTS, DEFAULT_DISPLAY_LAYOUT, DISPLAY_LAYOUTS, MAX_VENUE_DISPLAYS, normalizeDisplayLayout } from '../shared/displays.js';
-import { api, Dialog, Empty, External, Field, groupRounds, Issue, watchLink } from './ui.jsx';
+import { api, Dialog, Empty, External, Field, groupRounds, Issue, watchLink, wordFit } from './ui.jsx';
 import { SpectatorContent } from './Spectator.jsx';
 
 const formValues = event => Object.fromEntries(new FormData(event.currentTarget));
@@ -196,7 +196,7 @@ export default function Displays({ meetup, act, busy, notify }) {
           const division = meetup.divisions.find(item => item.id === screen.division);
           return <div className="screen-row" key={screen.id}>
             <span className="metric-icon"><LayoutTemplate size={20} /></span>
-            <div className="queue-match"><strong>{screen.name}</strong><small>
+            <div className="queue-match"><strong style={wordFit(screen.name)}>{screen.name}</strong><small>
               {DISPLAY_LAYOUTS[normalizeDisplayLayout(screen.layout)]}{division && ' · ' + division.name}{spectator && ' · Spectator view'}
             </small></div>
             <div className="actions">

@@ -675,6 +675,32 @@ test('teams register through the open link with a valid token, and only edit the
     .every(item => item.contact.phone === '+972 50 999 9999'));
 });
 
+test('one account registers up to five robots in a meetup, counting robots staff assigned to it', () => {
+  const event = registrationEvent();
+  const [first, second] = event.meetup.divisions;
+  const mine = () => event.meetup.divisions.flatMap(division => division.robots).filter(robot => robot.owner === team.email);
+  for (let index = 0; index < 5; index++) event.register({ division: index < 3 ? first.id : second.id, name: 'Entry ' + index });
+  assert.throws(() => event.register({ division: second.id, name: 'Sixth' }), { status: 409, message: /up to 5 robots/ });
+  assert.equal(mine().length, 5);
+  // Another account and staff are not held back by this account's cap.
+  event.register({ division: second.id, name: 'Rival' }, stranger);
+  event.dispatch({ type: 'addRobots', division: second.id, robots: [{ team: 'Hammer Bros', name: 'Staff entry' }] });
+  // Cancelling frees a place, and a robot staff hand to the account takes one.
+  event.dispatch({ type: 'teamCancel', division: second.id, robot: mine().at(-1).id }, team);
+  event.dispatch({ type: 'renameRobot', robot: event.robot(0).id, team: 'Team 0', name: 'Bot 0', owner: team.email });
+  assert.throws(() => event.register({ division: second.id, name: 'Sixth' }), /up to 5 robots/);
+});
+
+test('the activity log keeps the newest 500 changes', () => {
+  let meetup = newMeetup(meetupData, manager);
+  for (let index = 0; index < 520; index++) {
+    meetup = updateMeetup(meetup, { type: 'publish', published: index % 2 === 0 }, manager, registry, index);
+  }
+  assert.equal(meetup.revision, 520);
+  assert.equal(meetup.audit.length, 500);
+  assert.deepEqual([meetup.audit[0].at, meetup.audit.at(-1).at], [20, 519]);
+});
+
 test('team registration closes with the switch, a new link, a started class, or a completed meetup', () => {
   const event = registrationEvent();
   const [first, second] = event.meetup.divisions;

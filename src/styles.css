@@ -1,4 +1,4 @@
-/* Hangar HUD: dark steel and blue-gray, ice-blue for live state, cobalt for primary actions, gears for timers and branding. */
+﻿/* Hangar HUD: dark steel and blue-gray, ice-blue for live state, cobalt for primary actions, gears for timers and branding. */
 :root {
   color-scheme: dark;
   --bg: #0e1318;
@@ -182,13 +182,14 @@ small { font-size: .875rem; }
 .arena-heading .overline, .arena-control .section-head .overline { color: var(--accent); }
 .arena-heading h3 { font: 700 1.5rem/1.1 var(--display-font); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 4px; overflow-wrap: anywhere; }
 .arena-pair { margin: 17px 0 12px; padding: 11px; border: 1px solid var(--line); background: var(--surface-lo); flex: 1; }
-.pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; margin: 5px 0; }
+.pair { --name-size: 1.3rem; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; margin: 5px 0; }
 .pair > div:last-child { text-align: end; }
-.pair strong { display: block; font: 700 1.3rem/1.05 var(--display-font); letter-spacing: .02em; text-transform: uppercase; overflow-wrap: anywhere; }
+.pair strong { display: block; font: 700 var(--name-size)/1.05 var(--display-font); letter-spacing: .02em; text-transform: uppercase; overflow-wrap: anywhere; }
 .pair small { display: block; margin: 5px 0 0; color: var(--muted); font-weight: 600; line-height: 1.1; overflow-wrap: anywhere; }
 .pair > span { color: var(--steel); font: 400 .9rem/1 var(--mono); letter-spacing: .08em; }
 .pair-placeholder { color: var(--muted); min-height: 38px; display: flex; align-items: center; }
-.arena-pair .pair strong { font-size: 1.02rem; letter-spacing: 0; }
+.arena-pair .pair { --name-size: 1.02rem; }
+.arena-pair .pair strong { letter-spacing: 0; }
 .arena-pair .timer { text-align: center; margin-top: 11px; }
 .arena-pair .dial-timer { --dial: 132px; }
 .arena-next { display: grid; gap: 5px; border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
@@ -215,9 +216,9 @@ small { font-size: .875rem; }
 .queue-row { display: grid; grid-template-columns: 58px minmax(100px, 1fr) minmax(77px, auto) minmax(90px, auto); align-items: center;
   gap: 11px; border-top: 1px solid var(--line); padding: 11px 0; }
 .match-code { font: 400 .88rem/1.1 var(--mono); color: var(--muted); }
-.queue-match { min-width: 0; overflow-wrap: anywhere; }
+.queue-match { --name-size: 1.05rem; min-width: 0; overflow-wrap: anywhere; }
 .queue-match strong, .queue-match small { display: block; }
-.queue-match strong { font: 600 1.05rem/1.2 var(--display-font); letter-spacing: .02em; }
+.queue-match strong { font: 600 var(--name-size)/1.2 var(--display-font); letter-spacing: .02em; }
 .queue-match small { color: var(--muted); font-weight: 600; }
 .queue-actions { display: flex; justify-content: end; flex-wrap: wrap; gap: 5px; }
 .roster-row, .roster-labels { display: grid; grid-template-columns: minmax(45px, 70px) minmax(110px, 1fr) minmax(120px, max-content) minmax(90px, auto);
@@ -432,7 +433,7 @@ input::placeholder, textarea::placeholder { color: #75849a; }
 .ringmaster-faceoff .pair > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .ringmaster-faceoff .timer { grid-column: 2; grid-row: 1; }
 .ringmaster-faceoff .dial-timer { --dial: clamp(118px, 10vw, 168px); }
-.ringmaster-faceoff .pair strong { font-size: clamp(1.25rem, 1.9vw, 2.15rem); }
+.ringmaster-faceoff .pair { --name-size: clamp(1.25rem, 1.9vw, 2.15rem); }
 .ringmaster-faceoff .pair-placeholder { grid-column: 1 / -1; }
 .ringmaster-next-pair { margin-top: 4px; font: 600 1.05rem var(--display-font); letter-spacing: .03em; text-transform: uppercase; overflow-wrap: anywhere; }
 .ringmaster-empty { color: var(--muted); }
@@ -448,9 +449,9 @@ input::placeholder, textarea::placeholder { color: #75849a; }
 .battle-faceoff { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); width: 100%; padding: 20px clamp(14px, 4vw, 60px);
   gap: clamp(9px, 2vw, 32px); align-items: center;
   background: linear-gradient(var(--to-end), color-mix(in srgb, var(--accent) 10%, transparent), transparent 38% 62%, color-mix(in srgb, var(--steel) 22%, transparent)); }
-.battle-team { text-align: center; min-width: 0; }
+.battle-team { --name-size: clamp(1.6rem, 4.3vw, 5.6rem); text-align: center; min-width: 0; }
 .battle-team > span { font-weight: 700; font-size: clamp(.95rem, 1.9vw, 1.8rem); color: var(--muted); }
-.battle-team h2 { font: 800 clamp(1.6rem, 4.3vw, 5.6rem)/.92 var(--display-font); text-transform: uppercase; overflow-wrap: anywhere; margin-top: 5px; }
+.battle-team h2 { font: 800 var(--name-size)/.92 var(--display-font); text-transform: uppercase; overflow-wrap: anywhere; margin-top: 5px; }
 .battle-center { display: grid; justify-items: center; gap: clamp(4px, 1vh, 12px); }
 .battle-versus { font: 400 clamp(.9rem, 1.6vw, 1.5rem)/1 var(--mono); color: var(--steel); letter-spacing: .3em; }
 .battle-clock { --dial: clamp(190px, min(26vw, 44vh), 460px); }
@@ -646,7 +647,7 @@ input::placeholder, textarea::placeholder { color: #75849a; }
   .battle-clock { --dial: 190px; }
   .ringmaster-faceoff { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 6px; }
   .ringmaster-faceoff .pair > div:last-child { grid-column: 2; }
-  .ringmaster-faceoff .pair strong { font-size: 1.1rem; }
+  .ringmaster-faceoff .pair { --name-size: 1.1rem; }
   .ringmaster-faceoff .timer { grid-column: 1 / -1; grid-row: 2; }
   .ringmaster-faceoff .dial-timer { --dial: 112px; }
 }
@@ -696,7 +697,14 @@ input::placeholder, textarea::placeholder { color: #75849a; }
 .battle-team .robot-weapon { font-size: clamp(.8rem, 1.2vw, 1.25rem); margin-top: clamp(6px, 1vh, 12px); }
 /* Photos line up across the face-off even when one robot's name wraps to two lines. */
 .battle-team { display: grid; justify-items: center; align-self: start; }
-.battle-faceoff:has(.robot-photo) .battle-team h2 { font-size: clamp(1.5rem, 3.7vw, 4.8rem); }
+.battle-faceoff:has(.robot-photo) .battle-team { --name-size: clamp(1.5rem, 3.7vw, 4.8rem); }
+/* Robot names shrink to fit their box instead of breaking mid-word. --word is the length of the name's longest word
+   (wordFit in ui.jsx) and .7em is about one wide capital, so only a word still too wide at .75rem breaks.
+   The name boxes fill their row (flex: 1) so they can be size containers. */
+.pair-text, .queue-match, .battle-team { container-type: inline-size; }
+.pair-text, .robot-row-name > .queue-match { flex: 1 1 0; }
+.ringmaster-faceoff .pair-text { flex: none; align-self: stretch; }
+.pair strong, .queue-match strong, .battle-team h2 { font-size: min(var(--name-size), max(.75rem, 100cqi / (var(--word, 1) * .7))); }
 .last-call-robots { display: flex; gap: 10px; align-items: flex-start; }
 .last-call-robots figure { display: grid; justify-items: center; gap: 2px; margin: 0; }
 .last-call-venue .last-call-robots { gap: clamp(12px, 3vw, 40px); }

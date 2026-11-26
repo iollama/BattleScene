@@ -364,7 +364,7 @@ function DeleteMeetup({ meetup, refresh, onDeleted }) {
           onDeleted(meetup.id);
         } catch (error) {
           setIssue(error.message);
-          if (error.status === 409) refresh().catch(() => {});
+          if (error.status === 409) refresh(undefined, true).catch(() => {});
           setBusy(false);
         }
       }}>
@@ -567,6 +567,9 @@ function Login({ session, error, retry }) {
   </div>;
 }
 
+// How often the open meetup reloads (milliseconds), and how long "untouched" and "unchanged" have to last to slow it.
+const IDLE = { normally: 30_000, slowly: 300_000, rarely: 1_800_000, short: 600_000, quiet: 1_800_000, long: 7_200_000 };
+
 export default function Manage() {
   const [session, setSession] = useState(null);
   const [meetups, setMeetups] = useState(null);
@@ -582,6 +585,8 @@ export default function Manage() {
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
   const selectedRef = useRef(selected);
+  const meetupRef = useRef(null);
+  meetupRef.current = meetup;
   const toastTimer = useRef();
   const user = session?.user;
   const division = meetup?.divisions.find(item => item.id === chosen) ?? meetup?.divisions[0];
@@ -643,21 +648,52 @@ export default function Manage() {
     setMeetups(list => list && list.map(item => item.id === id && (item.revision ?? -1) <= revision
       ? { id, name, date, published, complete, updatedAt, revision } : item));
   }
-  async function refresh(key = selectedRef.current) {
-    if (key) accept(await api('meetups/' + key));
+  // `fresh` asks the server for an exact read. The regular reload accepts a copy up to 30 seconds old.
+  async function refresh(key = selectedRef.current, fresh = false) {
+    if (key) accept(await api('meetups/' + key + (fresh ? '?fresh=1' : '')));
   }
+  // Reload the open meetup every 30 seconds to pick up other people's changes. Every reload reads storage, so a
+  // dashboard that is both untouched and showing a meetup nobody is changing slows down: to every 5 minutes after
+  // 10 minutes untouched and 30 minutes unchanged, and to every 30 minutes after 2 hours of both. A meetup that is
+  // being run keeps the 30 seconds, and touching the page catches up at once.
   useEffect(() => {
     if (!selected || !user?.role) return;
+    let touched = Date.now();
+    let loaded = 0;
     function update(showError = false) {
       if (document.hidden) return;
+      loaded = Date.now();
       refresh(selected).catch(error => {
         if (showError && selectedRef.current === selected) setIssue(error.message);
       });
     }
+    function tick() {
+      const now = Date.now();
+      const untouched = now - touched;
+      const unchanged = now - (meetupRef.current?.updatedAt ?? 0);
+      const every = untouched > IDLE.long && unchanged > IDLE.long ? IDLE.rarely
+        : untouched > IDLE.short && unchanged > IDLE.quiet ? IDLE.slowly : IDLE.normally;
+      if (now - loaded >= every - 1000) update();
+    }
+    function touch() {
+      const away = Date.now() - touched > IDLE.short;
+      touched = Date.now();
+      if (away) update();
+    }
+    function shown() {
+      touched = Date.now();
+      update(true);
+    }
     update(true);
-    const interval = setInterval(update, 30000);
-    document.addEventListener('visibilitychange', update);
-    return () => { clearInterval(interval); document.removeEventListener('visibilitychange', update); };
+    const interval = setInterval(tick, IDLE.normally);
+    const signs = ['pointerdown', 'pointermove', 'keydown'];
+    for (const sign of signs) window.addEventListener(sign, touch, { passive: true });
+    document.addEventListener('visibilitychange', shown);
+    return () => {
+      clearInterval(interval);
+      for (const sign of signs) window.removeEventListener(sign, touch);
+      document.removeEventListener('visibilitychange', shown);
+    };
   }, [selected, user?.role]);
 
   async function act(data, notice) {
@@ -672,7 +708,7 @@ export default function Manage() {
       return update;
     } catch (error) {
       if (!error.details?.affected) setIssue(error.message);
-      if (error.status === 409 && !error.details?.affected) await refresh(meetup.id).catch(() => {});
+      if (error.status === 409 && !error.details?.affected) await refresh(meetup.id, true).catch(() => {});
       throw error;
     } finally {
       inFlight.current = false;
@@ -729,7 +765,7 @@ export default function Manage() {
           : !meetup ? <section className="panel"><Empty title={issue ? 'Meetup unavailable' : 'Loading meetup'} /></section>
           : <>
             <MeetupHeading meetup={meetup} overview={section === 'overview'} busy={busy}
-              refresh={() => refresh().then(() => notify('Meetup refreshed')).catch(error => setIssue(error.message))}
+              refresh={() => refresh(undefined, true).then(() => notify('Meetup refreshed')).catch(error => setIssue(error.message))}
               publish={() => act({ type: 'publish', published: !meetup.published }, meetup.published ? 'Meetup is private' : 'Spectator pages published').catch(() => {})} />
             {section === 'overview' && <Overview meetup={meetup} choose={id => openSection('arenas', id)}
               addClass={() => setClassEditor({})} act={act} busy={busy} />}

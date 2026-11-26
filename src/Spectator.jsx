@@ -10,7 +10,7 @@ import { ArenaDetails, WeightTabs } from './Tournament.jsx';
 import Ringmaster from './Ringmaster.jsx';
 import { SpectatorLadders } from './SpectatorLadders.jsx';
 import { RobotPhoto, usePreload, Weapon } from './RobotPhoto.jsx';
-import { api, BracketBoard, Countdown, Credit, Empty, findMatch, findRobot, matchup, Placements, QRAction, Standings, watchLink } from './ui.jsx';
+import { api, BracketBoard, Countdown, Credit, Empty, findMatch, findRobot, matchup, Placements, QRAction, Standings, watchLink, wordFit } from './ui.jsx';
 
 export function Brand({ href = '/' }) {
   return <a className="brand" href={href}><span className="brand-icon"><GearMark /></span>
@@ -30,7 +30,7 @@ function Battle({ division }) {
   const [first, second] = current.entrants.map(id => findRobot(division, id));
   const side = (robot, key) => <div className={'battle-team ' + key}>
     <RobotPhoto robot={robot} size="lg" />
-    <span><bdi>{robot.team}</bdi></span><h2><bdi>{robot.name}</bdi></h2><Weapon robot={robot} />
+    <span><bdi>{robot.team}</bdi></span><h2 style={wordFit(robot.name)}><bdi>{robot.name}</bdi></h2><Weapon robot={robot} />
   </div>;
   return <div className="battle">
     <div className="battle-live"><span className="status active"><i />{t('statusInBattle')}</span></div>

@@ -95,6 +95,25 @@ test('Blob store removes one object or everything under a prefix', async t => {
   assert.deepEqual((await store.paths('')).sort(), ['assets/onex/c.png', 'meetups/one-more.json']);
 });
 
+test('Blob store reads exactly unless a cached read is asked for, and deletes one path without listing', async t => {
+  withEnv(t, { BLOB_READ_WRITE_TOKEN: testToken });
+  const blob = fakeBlob();
+  const store = createStore({ local: false, blob });
+  await store.write('assets/one/a.png', new Uint8Array([1, 2, 3]), undefined, 'image/png');
+  await store.write('assets/one/a.png.bak', new Uint8Array([4]), undefined, 'image/png');
+  blob.calls.length = 0;
+  await store.read('meetups/one.json');
+  await store.read('assets/one/a.png', true);
+  assert.deepEqual([...(await store.read('assets/one/a.png', true, true)).value], [1, 2, 3]);
+  assert.deepEqual(blob.calls.map(options => options.useCache), [false, false, true]);
+
+  // A listing is a counted operation and a delete is free, so one path is deleted directly.
+  blob.calls.length = 0;
+  await store.remove('assets/one/a.png');
+  assert.ok(blob.calls.every(options => !('prefix' in options)));
+  assert.deepEqual(await store.paths('assets/one/'), ['assets/one/a.png.bak']);
+});
+
 test('Blob store passes the read-write token on every call when one is set, even with OIDC available', async t => {
   withEnv(t, { BLOB_READ_WRITE_TOKEN: testToken, BLOB_STORE_ID: 'store_test' });
   const blob = fakeBlob();

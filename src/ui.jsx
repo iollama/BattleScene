@@ -30,6 +30,8 @@ const FORMAT_KEYS = { single: 'formatSingle', double: 'formatDouble', rounds: 'f
 export const formatName = (value, t = english) => t(FORMAT_KEYS[value] ?? FORMAT_KEYS.single);
 export const findRobot = (division, id) => division?.robots.find(robot => robot.id === id);
 export const findMatch = (division, id) => division?.matches.find(match => match.id === id);
+// Face-off names shrink to fit their column instead of breaking mid-word; CSS reads this as --word (see styles.css).
+export const wordFit = name => ({ '--word': Math.max(1, ...String(name ?? '').split(/\s+/).map(word => Array.from(word).length)) });
 export const roundName = (match, t = english) => match.side === 'F'
   ? t(match.round === 1 ? 'grandFinal' : 'finalReset')
   : match.stage === 'final' ? t('final') : match.stage === 'decider' ? t('finalDecider') : t('roundNumber', { round: match.round });

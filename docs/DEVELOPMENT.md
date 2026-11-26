@@ -13,7 +13,7 @@ npm ci
 npm run dev
 ```
 
-Open [the local app](http://127.0.0.1:5173/). With `GOOGLE_CLIENT_ID` unset, the app runs in **demo mode**: it opens as **Alex Morgan**, the demo super admin, with a sample meetup (**Foundry Fight Night**) and three arenas. No accounts or cloud services are needed. Demo changes and new meetups persist in `.battlescene/data`. Delete `.battlescene/data/meetups/foundry.json` to reset the sample meetup.
+Open [the local app](http://127.0.0.1:5173/). With `GOOGLE_CLIENT_ID` unset, the app runs in **demo mode**: it opens as **Alex Morgan**, the demo super admin, with a sample meetup (**Foundry Fight Night**) and three arenas. No accounts or cloud services are needed. Demo changes and new meetups persist in `.battlescene/data`. Delete `.battlescene/data/meetups/foundry.json` and restart the dev server to reset the sample meetup. The server keeps copies of what it has read in memory, so restart it after changing any file in `.battlescene/data` by hand.
 
 To see the team side, open [the demo registration link](http://127.0.0.1:5173/register/foundry/demo) and select **Continue with Google** to act as the demo team (**Sam Rivera**). To return to the staff view, sign out on that page.
 

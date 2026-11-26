@@ -49,9 +49,29 @@ export function authService({ env, local, store }) {
     }
   }
 
+  // roles.json holds the managers, a short history of access changes, and the id of every meetup. `registry()` reads
+  // it exactly, for anything about to change it or to decide on the very latest; `roles()` is the copy that answers
+  // every other request, and costs no storage read while the file is unchanged (see cache.js).
   async function registry() {
     const record = await store().read('roles.json');
     return { value: record?.value ?? { managers: [] }, etag: record?.etag };
+  }
+  const roles = async () => (await store().relaxed('roles.json'))?.value ?? { managers: [] };
+
+  // Every change to roles.json goes through here. `change` gets the current value and returns the new one, or
+  // nothing to leave the file alone; it runs again if another write lands first. Returns the value now stored.
+  async function updateRegistry(change) {
+    for (let attempt = 0; ; attempt++) {
+      const { value, etag } = await registry();
+      const next = await change(value);
+      if (!next) return value;
+      try {
+        await store().write('roles.json', next, etag);
+        return next;
+      } catch (error) {
+        if (error.status !== 409 || attempt >= 3) throw error;
+      }
+    }
   }
 
   async function actor(request) {
@@ -60,7 +80,7 @@ export function authService({ env, local, store }) {
     if (!session) return null;
     const address = email(session.email);
     const admin = address === email(env.BOOTSTRAP_ADMIN_EMAIL);
-    const role = admin ? 'admin' : (await registry()).value.managers.includes(address) ? 'manager' : null;
+    const role = admin ? 'admin' : (await roles()).managers.includes(address) ? 'manager' : null;
     return { email: address, name: text(session.name) || address, role };
   }
 
@@ -123,7 +143,7 @@ export function authService({ env, local, store }) {
     }
   }
   return {
-    actor, callback, demoUser, localDemo, login, ready, registry,
+    actor, callback, demoUser, localDemo, login, ready, registry, roles, updateRegistry,
     logout: request => redirect('/', [setCookie(request, sessionName, '', 0), setCookie(request, demoAsName, '', 0)]),
   };
 }

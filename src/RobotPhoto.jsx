@@ -49,16 +49,26 @@ export function MechAvatar({ seed }) {
   </svg>;
 }
 
+// A photo that fails to load is tried again after these delays before the mech stays. A brand-new photo can be
+// refused for a moment by a server that hasn't seen the change yet.
+const PHOTO_RETRIES = [5000, 60000];
+
 // A robot's photo, or the mech stand-in when it has none or the image fails to load.
 // `size` is 'xs' (rows), 'sm' (cards), 'md' (arena panels) or 'lg' (the in-battle screen).
 export function RobotPhoto({ robot, size = 'sm', className = '' }) {
   const t = useT();
   const [failed, setFailed] = useState(false);
-  useEffect(() => setFailed(false), [robot?.photo]);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => { setFailed(false); setAttempt(0); }, [robot?.photo]);
+  useEffect(() => {
+    if (!failed || attempt >= PHOTO_RETRIES.length) return;
+    const retry = setTimeout(() => { setAttempt(attempt + 1); setFailed(false); }, PHOTO_RETRIES[attempt]);
+    return () => clearTimeout(retry);
+  }, [failed, attempt]);
   const label = robot?.name ? t('photoOf', { name: robot.name }) : '';
   return <span className={'robot-photo robot-photo-' + size + (className ? ' ' + className : '')}>
     {robot?.photo && !failed
-      ? <img src={robot.photo} alt={label} loading="lazy" decoding="async" onError={() => setFailed(true)} />
+      ? <img key={attempt} src={robot.photo} alt={label} loading="lazy" decoding="async" onError={() => setFailed(true)} />
       : <MechAvatar seed={robot?.id ?? robot?.name} />}
   </span>;
 }
